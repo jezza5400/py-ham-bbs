@@ -6,6 +6,8 @@ Tools and configuration files for building a lightweight ham radio packet BBS ma
 
 ## Documentation
 
+If possible the radio should be in FM-D (FM Data) mode as audio goes through the DATA path (USB soundcard or ACC connector) which is flat, wide, and unprocessed (what AX.25 wants)
+
 Documentation can be accessed in the sepperate [google doc](https://example.com/). ! Not yet accessable
 
 ## GitHub Actions
@@ -64,6 +66,7 @@ A dedicated formatting/colouring helper is included in the project at ./src/lib/
 import warnings
 from lib.terminal import use_color
 
+use_color()
 # Warnings will now be colored
 warnings.warn("message", category=UserWarning)
 ```
