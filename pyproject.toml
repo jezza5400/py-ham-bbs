@@ -9,7 +9,7 @@ dependencies = []
 
 # pytest configuration
 [tool.pytest]
-minversion = "9.0"
+minversion = "9"
 testpaths = ["tests"]
 addopts = ["-v"]
 python_files = ["test_*.py"]
@@ -17,5 +17,6 @@ filterwarnings = ["always"]
 pythonpath = ["src"]
 
 # Install with uv sync --group <name>
+# Or uv sync --dev <name>
 [dependency-groups]
-test = ["pytest"]
+dev = ["pytest"]
