@@ -16,26 +16,33 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        interpreter: ["3.13.11", "3.14.2"]
+        # 3.13t and 3.14t are the free-threaded versions
+        python-version: ["3.13", "3.13t", "3.14", "3.14t"]
 
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install uv (package/tooling)
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install uv
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          # Optimize for speed by ensuring we use the latest uv binary
+          version: "latest"
 
-      - name: Install interpreter from matrix using uv
-        run: |
-          echo "Installing interpreter: ${{ matrix.interpreter }}"
-          uv python install "${{ matrix.interpreter }}"
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          # This allows the action to find pre-installed binaries on the runner
+          # which is much faster than downloading them via uv.
+          allow-prereleases: true 
 
       - name: Sync dependencies
-        run: |
-          uv sync --python "${{ matrix.interpreter }}" --group test
+        # --frozen ensures we don't waste time re-resolving if uv.lock exists
+        run: uv sync --frozen --group test
 
       - name: Run tests
+        # uv run automatically uses the synced environment
         run: |
-          uv run -p "${{ matrix.interpreter }}" pytest
-          uv run -p "${{ matrix.interpreter }}" python src/main.py
+          uv run pytest
+          uv run python src/main.py
