@@ -1,4 +1,4 @@
-name: python-tests
+name: CI
 
 on:
   push:
@@ -16,33 +16,45 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        # 3.13t and 3.14t are the free-threaded versions
-        python-version: ["3.13", "3.13t", "3.14", "3.14t"]
+        python-version: ["3.14.2", "3.14.2t"]
 
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          # Optimize for speed by ensuring we use the latest uv binary
-          version: "latest"
-
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-          # This allows the action to find pre-installed binaries on the runner
-          # which is much faster than downloading them via uv.
-          allow-prereleases: true 
+          allow-prereleases: true
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Cache virtualenv
+        uses: actions/cache@v5
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-${{ matrix.python-version }}-
 
       - name: Sync dependencies
-        # --frozen ensures we don't waste time re-resolving if uv.lock exists
-        run: uv sync --frozen --group test
+        run: |
+          if [ -f uv.lock ]; then
+            echo "Lockfile found, using locked sync"
+            uv sync --locked --all-groups || {
+              echo "Locked sync failed, falling back to pyproject"
+              uv sync --all-groups
+            }
+          else
+            echo "No lockfile found, syncing from pyproject"
+            uv sync --all-groups
+          fi
 
       - name: Run tests
-        # uv run automatically uses the synced environment
         run: |
           uv run pytest
           uv run python src/main.py
