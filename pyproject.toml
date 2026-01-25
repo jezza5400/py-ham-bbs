@@ -16,7 +16,7 @@ python_files = ["test_*.py"]
 filterwarnings = ["always"]
 pythonpath = ["src"]
 
-# Install with uv sync --group <name>
-# Or uv sync --dev <name>
+# Install with uv sync --group <name> <optional package>
+# Or uv sync --dev <optional package>
 [dependency-groups]
 dev = ["pytest"]
