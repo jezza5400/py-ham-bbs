@@ -44,14 +44,14 @@ version = "0.1.0"
 source = { virtual = "." }
 
 [package.dev-dependencies]
-test = [
+dev = [
     { name = "pytest" },
 ]
 
 [package.metadata]
 
 [package.metadata.requires-dev]
-test = [{ name = "pytest" }]
+dev = [{ name = "pytest" }]
 
 [[package]]
 name = "pygments"
